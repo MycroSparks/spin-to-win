@@ -1,28 +1,15 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../core/store/store.hook";
 import { AppDispatch } from "../../core/store/store";
 import { coinsSlice } from "../../core/coins/coins.reducer";
+import { checkForWin, makeNewMatrix } from "../../core/game/game.util";
 
 const availableSymbols = ["X", "O", "Z", "Y", "Q", "M", "J", "K", "T"];
 
 export const Main: React.FC = () => {
   const coins = useAppSelector((state) => state.coins.value);
   const dispatch: AppDispatch = useAppDispatch();
-
-  const matrix = useMemo(() => {
-    return Array(3)
-      .fill(0)
-      .map(() =>
-        Array(5)
-          .fill(0)
-          .map(
-            () =>
-              availableSymbols[
-                Math.floor(Math.random() * availableSymbols.length)
-              ]
-          )
-      );
-  }, []);
+  const [matrix, setMatrix] = useState(makeNewMatrix(availableSymbols));
 
   return (
     <div
@@ -34,7 +21,14 @@ export const Main: React.FC = () => {
       }}
     >
       <div style={{ flex: 1 }}></div>
-      <div style={{ display: "flex", flexDirection: "column", flex: 2 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 2,
+          alignItems: "center",
+        }}
+      >
         {matrix.map((row, i) => {
           return (
             <div
@@ -44,6 +38,7 @@ export const Main: React.FC = () => {
                 flex: 1,
                 alignContent: "center",
                 justifyContent: "center",
+                minWidth: "50%",
               }}
             >
               {row.map((value, j) => {
@@ -108,7 +103,15 @@ export const Main: React.FC = () => {
             justifyContent: "center",
           }}
         >
-          <button>SPIN</button>
+          <button
+            onClick={() => {
+              const newMatrix = makeNewMatrix(availableSymbols);
+              setMatrix(newMatrix);
+              console.log(checkForWin(newMatrix) ? "YOU WIN" : "YOU LOSE");
+            }}
+          >
+            SPIN
+          </button>
         </div>
       </div>
     </div>
