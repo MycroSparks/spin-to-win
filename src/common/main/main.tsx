@@ -7,9 +7,11 @@ import { checkForWin, makeNewMatrix } from "../../core/game/game.util";
 const availableSymbols = ["X", "O", "Z", "Y", "Q", "M", "J", "K", "T"];
 
 export const Main: React.FC = () => {
+  const [matrix, setMatrix] = useState(makeNewMatrix(availableSymbols));
+  const [betAmount, setBetAmount] = useState<number>(0);
+
   const coins = useAppSelector((state) => state.coins.value);
   const dispatch: AppDispatch = useAppDispatch();
-  const [matrix, setMatrix] = useState(makeNewMatrix(availableSymbols));
 
   return (
     <div
@@ -20,7 +22,9 @@ export const Main: React.FC = () => {
         display: "flex",
       }}
     >
-      <div style={{ flex: 1 }}></div>
+      <div style={{ flex: 1 }}>
+        <h3>Coins: {coins}</h3>
+      </div>
       <div
         style={{
           display: "flex",
@@ -80,18 +84,20 @@ export const Main: React.FC = () => {
         >
           <button
             style={{ flex: 1 }}
-            onClick={() =>
-              dispatch({ type: coinsSlice.actions.decrement.type })
-            }
+            onClick={() => {
+              setBetAmount((prevState) => Math.max(prevState - 1, 0));
+              //dispatch({ type: coinsSlice.actions.decrement.type })
+            }}
           >
             {"<"}
           </button>
-          <p style={{ flex: 2 }}>{coins}</p>
+          <p style={{ flex: 2 }}>{betAmount}</p>
           <button
             style={{ flex: 1 }}
-            onClick={() =>
-              dispatch({ type: coinsSlice.actions.increment.type })
-            }
+            onClick={() => {
+              setBetAmount((prevState) => prevState + 1);
+              // dispatch({ type: coinsSlice.actions.increment.type })
+            }}
           >
             {">"}
           </button>
@@ -105,6 +111,14 @@ export const Main: React.FC = () => {
         >
           <button
             onClick={() => {
+              if (coins < betAmount) {
+                console.log("NOT ENOUGH COINS M'LORD");
+                return;
+              }
+              dispatch({
+                type: coinsSlice.actions.incrementByAmount.type,
+                payload: -betAmount,
+              });
               const newMatrix = makeNewMatrix(availableSymbols);
               setMatrix(newMatrix);
               console.log(checkForWin(newMatrix) ? "YOU WIN" : "YOU LOSE");
