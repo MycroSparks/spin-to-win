@@ -4,7 +4,7 @@ import { takeLatest } from "redux-saga/effects";
 function* doSome({ payload: value }: PayloadAction<number>) {
   try {
     //console the next value
-    console.log(0);
+    console.log("sagatest");
     yield null;
   } catch (error) {
     console.log(error);

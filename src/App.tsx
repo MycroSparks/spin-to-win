@@ -1,17 +1,27 @@
-import "./App.css";
 import { Provider } from "react-redux";
 import store from "./core/store/store";
-import { Main } from "./common/main/main";
+import { GameContainer } from "./common/game/game.container";
+import { ThemeProvider } from "@mui/material/styles";
+import { Box } from "@mui/material";
+import theme from "./core/theme/theme.constant";
 
 function App() {
   return (
-    <div className="App">
-      <Provider store={store}>
-        <header className="App-header">
-          <Main />
-        </header>
-      </Provider>
-    </div>
+    <ThemeProvider theme={{ ...theme }}>
+      <Box
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          fontSize: "calc(10px + 2vmin)",
+          textAlign: "center",
+          backgroundColor: theme.palette.background.default,
+        }}
+      >
+        <Provider store={store}>
+          <GameContainer />
+        </Provider>
+      </Box>
+    </ThemeProvider>
   );
 }
 
