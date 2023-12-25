@@ -7,13 +7,14 @@ import { coinsSlice } from "../coins/coins.reducer";
 
 function* spinAfterEffects({ payload }: PayloadAction<number>) {
   try {
-    const numberOfSpins: number = yield select((state: RootState) => {
-      return state.game.numberOfSpins;
-    });
+    const numberOfSpins: number = yield select(
+      (state: RootState) => state.game.numberOfSpins
+    );
     const newMatrix = makeNewMatrix(symbolHierarchy, numberOfSpins % 4 === 0);
     yield put({ type: gameSlice.actions.setMatrix.type, payload: newMatrix });
     const result = getGameResult(newMatrix, payload);
     if (result) {
+      console.log("SPIN WIN: " + numberOfSpins);
       console.log("WON " + result + " COINS!!");
       yield put({
         type: coinsSlice.actions.incrementByAmount.type,
