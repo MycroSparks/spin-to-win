@@ -1,27 +1,34 @@
 const symbolsInRowForWin = 3;
 
+export const symbolHierarchy: Record<number, string[]> = {
+  0: ["10", "Q", "J"],
+  1: ["A", "K"],
+  2: ["T"],
+  3: ["Y", "Z"],
+  4: ["WOW"],
+  5: ["SMILE"],
+};
+
 export const makeNewMatrix = (
   symbolHierarchy: Record<string, string[]>,
-  numberOfSpins: number,
+  forceWin?: boolean,
   rows: number = 3,
   columns: number = 5
 ): string[][] => {
   const availableSymbols: string[] = new Array(0).concat(
     Object.values(symbolHierarchy).flat(Infinity)
   );
-
   const preRolledSymbol =
     availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
-  const winningRow: string[] | null =
-    numberOfSpins && (numberOfSpins + 1) % 4 === 0
-      ? new Array(columns).fill(0).map((_value, index) => {
-          return index < symbolsInRowForWin
-            ? preRolledSymbol
-            : availableSymbols[
-                Math.floor(Math.random() * availableSymbols.length)
-              ];
-        })
-      : null;
+  const winningRow: string[] | null = forceWin
+    ? new Array(columns).fill(0).map((_value, index) => {
+        return index < symbolsInRowForWin
+          ? preRolledSymbol
+          : availableSymbols[
+              Math.floor(Math.random() * availableSymbols.length)
+            ];
+      })
+    : null;
 
   const newMatrix = new Array(rows).fill(0).map(() =>
     Array(columns)
@@ -37,6 +44,19 @@ export const makeNewMatrix = (
   }
 
   return newMatrix;
+};
+
+export const symbolValues: Record<string, number> = {
+  "10": 1,
+  Q: 1,
+  J: 1,
+  A: 1.5,
+  K: 1.5,
+  T: 3,
+  Y: 3,
+  Z: 3,
+  WOW: 7,
+  SMILE: 20,
 };
 
 export const getGameResult = (matrix: string[][], betAmount: number) => {
@@ -73,15 +93,17 @@ export const getGameResult = (matrix: string[][], betAmount: number) => {
       maxConsecutiveSymbol.amount + 1;
   }
 
-  console.log(rowConsecutiveSymbol);
   let winnings = 0;
 
   //TODO: Add different values from PayoutTable
   for (const symbol in rowConsecutiveSymbol) {
     if (rowConsecutiveSymbol[symbol] >= 3) {
-      winnings += 10 * betAmount;
+      // Basic exponential reward system - more symbols in a row = exponentially higher payout multiplier. (Maybe we want a nlogn function instead
+      // but for the sake of the test this should be fine)
+      const multiplier = Math.pow(rowConsecutiveSymbol[symbol] - 2, 2);
+      winnings += 5 * multiplier * symbolValues[symbol] * betAmount;
     }
   }
 
-  return winnings;
+  return Math.ceil(winnings);
 };

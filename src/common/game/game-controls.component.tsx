@@ -1,7 +1,6 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch } from "../../core/store/store.hook";
 import { AppDispatch } from "../../core/store/store";
-import { getGameResult, makeNewMatrix } from "../../core/game/game.util";
 import { coinsSlice } from "../../core/coins/coins.reducer";
 import Button from "@mui/material/Button";
 import { Box } from "@mui/material";
@@ -9,18 +8,10 @@ import { ThemedText } from "../themed-components/themed-text.component";
 import { gameSlice } from "../../core/game/game.reducer";
 
 interface Props {
-  setMatrix: Dispatch<SetStateAction<string[][]>>;
-  symbolHierarchy: Record<number, string[]>;
   currentCoins: number;
-  numberOfSpins: number;
 }
 
-export const GameControls: React.FC<Props> = ({
-  setMatrix,
-  symbolHierarchy,
-  currentCoins,
-  numberOfSpins,
-}) => {
+export const GameControls: React.FC<Props> = ({ currentCoins }) => {
   const [betAmount, setBetAmount] = useState<number>(1);
 
   const intervalRef = useRef<NodeJS.Timer | null>(null);
@@ -127,20 +118,7 @@ export const GameControls: React.FC<Props> = ({
               type: coinsSlice.actions.incrementByAmount.type,
               payload: -betAmount,
             });
-            dispatch({ type: gameSlice.actions.increment.type });
-            const newMatrix = makeNewMatrix(symbolHierarchy, numberOfSpins);
-            setMatrix(newMatrix);
-            const gameResult = getGameResult(newMatrix, betAmount);
-            console.log(gameResult ? "YOU WIN" : "YOU LOSE");
-            if (gameResult) {
-              //WIN
-              dispatch({
-                type: coinsSlice.actions.incrementByAmount.type,
-                payload: gameResult,
-              });
-            } else {
-              //LOSE
-            }
+            dispatch({ type: gameSlice.actions.spin.type, payload: betAmount });
           }}
         >
           SPIN
