@@ -2,7 +2,7 @@ import { put, select, takeLatest } from "redux-saga/effects";
 import { gameSlice } from "./game.reducer";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store/store";
-import { getGameResult, makeNewMatrix, symbolHierarchy } from "./game.util";
+import { getGameResult, makeNewMatrix } from "./game.util";
 import { coinsSlice } from "../coins/coins.reducer";
 
 function* spinAfterEffects({ payload }: PayloadAction<number>) {
@@ -10,7 +10,7 @@ function* spinAfterEffects({ payload }: PayloadAction<number>) {
     const numberOfSpins: number = yield select(
       (state: RootState) => state.game.numberOfSpins
     );
-    const newMatrix = makeNewMatrix(symbolHierarchy, numberOfSpins % 4 === 0);
+    const newMatrix = makeNewMatrix(numberOfSpins % 4 === 0);
     yield put({ type: gameSlice.actions.setMatrix.type, payload: newMatrix });
     const result = getGameResult(newMatrix, payload);
     if (result) {

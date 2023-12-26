@@ -9,15 +9,19 @@ export const symbolHierarchy: Record<number, string[]> = {
   5: ["SMILE"],
 };
 
+export const getAvailableSymbols = () => {
+  const availableSymbols: string[] = new Array(0).concat(
+    Object.values(symbolHierarchy).flat(Infinity)
+  );
+  return availableSymbols;
+};
+
 export const makeNewMatrix = (
-  symbolHierarchy: Record<string, string[]>,
   forceWin?: boolean,
   rows: number = 3,
   columns: number = 5
 ): string[][] => {
-  const availableSymbols: string[] = new Array(0).concat(
-    Object.values(symbolHierarchy).flat(Infinity)
-  );
+  const availableSymbols = getAvailableSymbols();
   const preRolledSymbol =
     availableSymbols[Math.floor(Math.random() * availableSymbols.length)];
   const winningRow: string[] | null = forceWin

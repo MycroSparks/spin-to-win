@@ -1,10 +1,10 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { GameStateType } from "./game.types";
-import { makeNewMatrix, symbolHierarchy } from "./game.util";
+import { makeNewMatrix } from "./game.util";
 
 const initialState: GameStateType = {
   numberOfSpins: 0,
-  symbolMatrix: makeNewMatrix(symbolHierarchy),
+  symbolMatrix: makeNewMatrix(),
   spinResult: null,
 };
 
