@@ -1,8 +1,8 @@
-import { Box } from "@mui/material";
 import { ThemedText } from "../themed-components/themed-text.component";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { slotMachineRows } from "../../core/game/game.const";
 import { getAvailableSymbols } from "../../core/game/game.util";
+import Box from "@mui/material/Box";
 
 interface Props {
   matrix: string[][];
@@ -23,27 +23,24 @@ export const SlotMachine: React.FC<Props> = ({ matrix }) => {
       });
     }
   }, []);
-  console.log("scrollHeight: " + ref.current[0]?.scrollHeight ?? 0);
-  console.log("scrollTop:" + ref.current[0]?.scrollTop ?? 0);
 
   useEffect(() => {
-    const intervals: NodeJS.Timer[] = [];
-    for (let i = 0; i < 5; i++) {
-      intervals[i] = setInterval(() => {
+    let interval: NodeJS.Timer | undefined;
+    console.log(ref.current.length);
+    interval = setInterval(() => {
+      for (let i = 0; i < 5; i++) {
         ref.current[i].scrollBy({ top: 20 });
         const bottom =
           ref.current[i].scrollHeight - ref.current[i].scrollTop ===
           ref.current[i].clientHeight;
-        console.log(i + ": " + bottom);
         if (bottom) {
-          clearInterval(intervals[i]);
+          console.log("Bottom: " + i);
+          clearInterval(interval);
         }
-      }, 50);
-    }
-    return () => {
-      for (const interval in intervals) {
-        clearInterval(interval);
       }
+    }, 50);
+    return () => {
+      clearInterval(interval);
     };
   }, [ref]);
 
