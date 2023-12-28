@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { CoinsStateType } from "./coins.types";
 
-const initialState: CoinsStateType = { value: 0 };
+const initialState: CoinsStateType = { value: 2000 };
 
 export const coinsSlice = createSlice({
   name: "coins",

@@ -1,15 +1,20 @@
-import "./App.css";
 import { Provider } from "react-redux";
 import store from "./core/store/store";
-import { Main } from "./common/main/main";
+import { GameContainer } from "./common/game/game.container";
 
 function App() {
   return (
-    <div className="App">
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        fontSize: "calc(10px + 2vmin)",
+        textAlign: "center",
+        width: "100vw",
+      }}
+    >
       <Provider store={store}>
-        <header className="App-header">
-          <Main />
-        </header>
+        <GameContainer />
       </Provider>
     </div>
   );

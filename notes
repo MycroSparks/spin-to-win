@@ -1,0 +1,1 @@
+- Fix bug where sometimes it doesn't count as win when you get 3 in a row, if you got 2 in a row below that or something
