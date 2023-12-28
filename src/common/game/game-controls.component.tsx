@@ -1,26 +1,31 @@
 import { useEffect, useRef, useState } from "react";
 import { useAppDispatch } from "../../core/store/store.hook";
-import { AppDispatch } from "../../core/store/store";
-import { coinsSlice } from "../../core/coins/coins.reducer";
-import Button from "@mui/material/Button";
-import { Box } from "@mui/material";
-import { ThemedText } from "../themed-components/themed-text.component";
-import { gameSlice } from "../../core/game/game.reducer";
+import { incrementByAmount } from "../../core/coins/coins.reducer";
+import { setBet, spinStart } from "../../core/game/game.reducer";
+import { Popup } from "../components/popup.component";
+import { Paytable } from "./game-paytable.component";
 
 interface Props {
   currentCoins: number;
+  spinning: boolean;
 }
 
-export const GameControls: React.FC<Props> = ({ currentCoins }) => {
+export const GameControls: React.FC<Props> = ({ currentCoins, spinning }) => {
   const [betAmount, setBetAmount] = useState<number>(1);
+  const [paytablePopup, setPaytablePopup] = useState(false);
+  const [spinnable, setSpinnable] = useState(true);
 
-  const intervalRef = useRef<NodeJS.Timer | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
-  const dispatch: AppDispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    return () => stopCounter();
-  }, []);
+  const stopCounter = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      dispatch(setBet(betAmount));
+    }
+  };
 
   const startCounter = (value: number, options?: { stopAtNumber?: number }) => {
     if (intervalRef.current) {
@@ -36,14 +41,30 @@ export const GameControls: React.FC<Props> = ({ currentCoins }) => {
     }, 160);
   };
 
-  const stopCounter = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
+  useEffect(() => {
+    return () => stopCounter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A little spin cooldown for a nicer feel and to allow the user to register the results of the spin
+  useEffect(() => {
+    let timeout: number | undefined;
+    if (spinning) {
+      setSpinnable(false);
+    } else {
+      timeout = setTimeout(() => {
+        setSpinnable(true);
+      }, 100);
     }
-  };
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [spinning]);
+
   return (
-    <Box
+    <div
       style={{
         display: "flex",
         flex: 1,
@@ -53,7 +74,21 @@ export const GameControls: React.FC<Props> = ({ currentCoins }) => {
         alignItems: "center",
       }}
     >
-      <Box
+      <Popup
+        containerStyle={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0, 0.8)",
+          display: "flex",
+        }}
+        open={paytablePopup}
+        setOpen={setPaytablePopup}
+        closeOnOutsideClick
+        closeOnContentClick
+        noDefaultCloseButton
+      >
+        <Paytable />
+      </Popup>
+      <div
         style={{
           flex: 1,
           display: "flex",
@@ -61,69 +96,73 @@ export const GameControls: React.FC<Props> = ({ currentCoins }) => {
         }}
       >
         <span style={{ display: "flex", alignItems: "center" }}>
-          <Button
-            variant={"contained"}
+          <button
             onMouseDown={() => {
               setBetAmount((prevState) => Math.max(prevState - 1, 1));
               startCounter(-1, { stopAtNumber: 1 });
             }}
             onMouseUp={stopCounter}
             onMouseLeave={stopCounter}
-            onClick={() => {
-              // setBetAmount((prevState) => Math.max(prevState - 1, 0));
-              //dispatch({ type: coinsSlice.actions.decrement.type })
-            }}
           >
             {"<"}
-          </Button>
+          </button>
         </span>
         <span
           style={{ display: "flex", minWidth: 50, justifyContent: "center" }}
         >
-          <ThemedText variant={"h4"}>{betAmount}</ThemedText>
+          <p>{betAmount}</p>
         </span>
         <span style={{ display: "flex", alignItems: "center" }}>
-          <Button
-            variant={"contained"}
+          <button
             onMouseDown={() => {
               setBetAmount((prevState) => prevState + 1);
               startCounter(1);
             }}
-            onMouseUp={stopCounter}
+            onMouseUp={() => {
+              stopCounter();
+            }}
             onMouseLeave={stopCounter}
-            // onClick={() => {
-            // setBetAmount((prevState) => prevState + 1);
-            //   // dispatch({ type: coinsSlice.actions.increment.type })
-            // }}
           >
             {">"}
-          </Button>
+          </button>
         </span>
-      </Box>
-      <Box
+      </div>
+      <div
         style={{
           flex: 1,
           display: "flex",
           justifyContent: "center",
         }}
       >
-        <Button
-          variant={"contained"}
+        <button
+          disabled={!spinnable}
+          onClick={() => {
+            setPaytablePopup(true);
+          }}
+        >
+          Paytable
+        </button>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <button
+          disabled={!spinnable}
           onClick={() => {
             if (currentCoins < betAmount) {
-              console.log("NOT ENOUGH COINS M'LORD");
               return;
             }
-            dispatch({
-              type: coinsSlice.actions.incrementByAmount.type,
-              payload: -betAmount,
-            });
-            dispatch({ type: gameSlice.actions.spin.type, payload: betAmount });
+            dispatch(incrementByAmount(-betAmount));
+            dispatch(spinStart());
           }}
         >
           SPIN
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 };

@@ -1,130 +1,89 @@
-import { ThemedText } from "../themed-components/themed-text.component";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { slotMachineRows } from "../../core/game/game.const";
-import { getAvailableSymbols } from "../../core/game/game.util";
-import Box from "@mui/material/Box";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  fillerSymbolAmount,
+  slotMachineRows,
+} from "../../core/game/game.const";
+import { symbolImages } from "../../core/game/game.const";
+import { Container, Sprite, usePixiTicker } from "react-pixi-fiber";
+import * as PIXI from "pixi.js";
 
 interface Props {
   matrix: string[][];
+  containerSize: { width: number; height: number };
+  spinning: boolean;
+  onSpinningStop: () => void;
 }
 
-export const SlotMachine: React.FC<Props> = ({ matrix }) => {
-  const [elementDetails, setElementDetails] = useState<{
-    height: number;
-    width: number;
-  }>({ height: 0, width: 0 });
+export const SlotMachine: React.FC<Props> = ({
+  matrix,
+  containerSize,
+  spinning,
+  onSpinningStop,
+}) => {
+  const [positionY, setPositionY] = useState(0);
+  const [animationRunning, setAnimationRunning] = useState(false);
 
-  const ref = useRef<HTMLDivElement[]>([]);
   useEffect(() => {
-    if (ref.current) {
-      setElementDetails({
-        height: ref.current[0].clientHeight,
-        width: ref.current[0].clientWidth,
-      });
+    if (spinning) {
+      setAnimationRunning(true);
+      setPositionY(0);
+    } else {
+      setAnimationRunning(false);
     }
-  }, []);
+  }, [spinning]);
 
-  useEffect(() => {
-    let interval: NodeJS.Timer | undefined;
-    console.log(ref.current.length);
-    interval = setInterval(() => {
-      for (let i = 0; i < 5; i++) {
-        ref.current[i].scrollBy({ top: 20 });
-        const bottom =
-          ref.current[i].scrollHeight - ref.current[i].scrollTop ===
-          ref.current[i].clientHeight;
-        if (bottom) {
-          console.log("Bottom: " + i);
-          clearInterval(interval);
-        }
-      }
-    }, 50);
-    return () => {
-      clearInterval(interval);
+  const squareSize = useMemo(() => {
+    return {
+      width: containerSize.width / 5,
+      height: containerSize.height / slotMachineRows,
     };
-  }, [ref]);
+  }, [containerSize.height, containerSize.width]);
+
+  const animate = useCallback(
+    (delta: number) => {
+      if (animationRunning) {
+        // Filler symbols + 3x rows of proper non filler matrix at the end so end = filler + 3
+        const endElement = fillerSymbolAmount + 3;
+        const spinningSpeed = 80;
+        const newPositionY = positionY - spinningSpeed * delta;
+        if (newPositionY <= -squareSize.height * endElement) {
+          setPositionY(-squareSize.height * endElement);
+          setAnimationRunning(false);
+          onSpinningStop();
+          return;
+        }
+        setPositionY(newPositionY);
+      }
+    },
+    [animationRunning, onSpinningStop, positionY, squareSize.height]
+  );
+  usePixiTicker(animate);
 
   const transposed = useMemo(
     () => matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex])),
     [matrix]
   );
 
-  const fillerSymbols = useCallback(() => {
-    const availableSymbols = getAvailableSymbols();
-    return new Array(10)
-      .fill(0)
-      .map(
-        () =>
-          availableSymbols[Math.floor(Math.random() * availableSymbols.length)]
-      );
-  }, []);
-
   return (
-    <Box
-      style={{
-        display: "flex",
-        flex: 1,
-        alignItems: "center",
-        height: 500,
-      }}
-    >
+    <Container y={positionY}>
       {transposed.map((row, i) => {
         return (
-          <Box
-            ref={(el: HTMLDivElement) => (ref.current[i] = el)}
-            key={i}
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              alignContent: "center",
-              justifyContent: "center",
-              height: "100%",
-              overflowY: "hidden",
-            }}
-          >
+          <Container key={i}>
             {row.map((value, j) => {
               return (
-                <Box
+                <Sprite
                   key={j}
-                  style={{
-                    display: "flex",
-                    height: elementDetails.height / slotMachineRows - 4, // the 4 comes from borders (2width * 2(bottom and top) = 4)
-                    alignItems: "center",
-                    borderWidth: 2,
-                    borderStyle: "solid",
-                    borderColor: "red",
-                    minWidth: "19.7%",
-                  }}
-                >
-                  <ThemedText style={{ flex: 1 }} variant={"h4"}>
-                    {value}
-                  </ThemedText>
-                </Box>
+                  scale={0.2}
+                  anchor={{ x: 0.5, y: 0.5 }}
+                  x={i * squareSize.width + squareSize.width / 2}
+                  y={j * squareSize.height + squareSize.height / 2}
+                  texture={PIXI.Texture.from(symbolImages[value])}
+                />
               );
             })}
-            {fillerSymbols().map((value, j) => {
-              return (
-                <Box
-                  key={j}
-                  style={{
-                    display: "flex",
-                    height: elementDetails.height / slotMachineRows - 4, // the 4 comes from borders (2width * 2(bottom and top) = 4)
-                    alignItems: "center",
-                    borderWidth: 2,
-                    borderStyle: "solid",
-                    borderColor: "red",
-                    minWidth: "19.7%",
-                  }}
-                >
-                  <ThemedText style={{ flex: 1 }} variant={"h4"}>
-                    {value}
-                  </ThemedText>
-                </Box>
-              );
-            })}
-          </Box>
+          </Container>
         );
       })}
-    </Box>
+    </Container>
   );
 };
