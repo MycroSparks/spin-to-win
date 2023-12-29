@@ -12,7 +12,7 @@ export const symbolsInRowForWin = 3;
 
 export const slotMachineRows = 3;
 
-export const fillerSymbolAmount = 40;
+export const fillerSymbolAmount = 30;
 
 export const symbolValues: Record<string, number> = {
   crowNest: 1,

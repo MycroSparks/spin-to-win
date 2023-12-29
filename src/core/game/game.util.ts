@@ -98,7 +98,6 @@ export const getGameResult = (matrix: string[][], betAmount: number) => {
       if (rowConsecutiveSymbol[symbol][i] >= 3) {
         // Basic exponential reward system - more symbols in a row = exponentially higher payout multiplier. (Maybe we want a nlogn function instead
         // but for the sake of the test this should be fine)
-        console.log(symbolValues[symbol]);
         winnings += getConsecutiveSymbolValue(
           symbol,
           rowConsecutiveSymbol[symbol][i],
