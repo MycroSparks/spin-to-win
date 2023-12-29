@@ -40,8 +40,6 @@ export const gameSlice = createSlice({
         [...state.symbolMatrix[length - 3]],
         [...state.symbolMatrix[length - 2]],
         [...state.symbolMatrix[length - 1]],
-        // The 30 beneath dictates how many symbols there's going to be inbetween and how long the spins last.
-        // In a real game id crank it up and speed up the animation for a better spinning feel
         ...makeNewMatrix(false, fillerSymbolAmount),
         ...action.payload,
       ];
