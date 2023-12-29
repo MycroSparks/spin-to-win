@@ -82,13 +82,12 @@ export const getGameResult = (matrix: string[][], betAmount: number) => {
         maxConsecutiveSymbol.amount + 1,
       ];
     } else {
-      rowConsecutiveSymbol[maxConsecutiveSymbol.type].concat(
-        maxConsecutiveSymbol.amount + 1
-      );
+      rowConsecutiveSymbol[maxConsecutiveSymbol.type] = [
+        ...rowConsecutiveSymbol[maxConsecutiveSymbol.type],
+        maxConsecutiveSymbol.amount + 1,
+      ];
     }
   }
-
-  console.log(rowConsecutiveSymbol);
 
   let winnings = 0;
 
