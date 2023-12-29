@@ -44,7 +44,7 @@ export const SlotMachine: React.FC<Props> = ({
       if (animationRunning) {
         // Filler symbols + 3x rows of proper non filler matrix at the end so end = filler + 3
         const endElement = fillerSymbolAmount + 3;
-        const spinningSpeed = 80;
+        const spinningSpeed = 50;
         const newPositionY = positionY - spinningSpeed * delta;
         if (newPositionY <= -squareSize.height * endElement) {
           setPositionY(-squareSize.height * endElement);
@@ -64,6 +64,14 @@ export const SlotMachine: React.FC<Props> = ({
     [matrix]
   );
 
+  {
+    /*
+    Optional blur filter, I don't like how it looks but maybe
+  const blurFilter = new PIXI.filters.BlurFilter();
+  blurFilter.blur = animationRunning ? 1 : 0;
+  */
+  }
+
   return (
     <Container y={positionY}>
       {transposed.map((row, i) => {
@@ -72,6 +80,8 @@ export const SlotMachine: React.FC<Props> = ({
             {row.map((value, j) => {
               return (
                 <Sprite
+                  //optional filter
+                  //filters={[blurFilter]}
                   key={j}
                   scale={0.2}
                   anchor={{ x: 0.5, y: 0.5 }}
