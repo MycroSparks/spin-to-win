@@ -1,8 +1,8 @@
 # Instructions
 
-Use git clone, or just download the zip file from the github link.
-Before running the project you have to use the "npm install" command in the projects root folder.
-To run the project after all the steps above, simply use the "npm run dev" command.
+Use git clone, or just download the zip file from the github link.  
+Before running the project you have to use the "npm install" command in the projects root folder.  
+To run the project after all the steps above, simply use the "npm run dev" command and then open http://localhost:5173/ in your browser.
 
 # Documentation
 
